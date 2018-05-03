@@ -9,6 +9,29 @@ Why don't use android DownloadManger? In fact, it's easy to use android Download
 
 Now, it's an early version, it just support download file and configuration some options, and reset HTTP request pipeline.
 
+# GRADLE
+
+Step 1. Add the JitPack repository to your build file
+
+Add it in your root build.gradle at the end of repositories:
+
+```gradle
+allprojects {
+    repositories {
+        ...
+        maven { url 'https://jitpack.io' }
+    }
+}
+```
+
+Step 2. Add the dependency
+
+```java
+dependencies {
+    implementation 'com.github.onlynight:AndroidDownload:0.0.1'
+}
+```
+
 # USE
 
 It is simple to use **AndroidDownload**:
