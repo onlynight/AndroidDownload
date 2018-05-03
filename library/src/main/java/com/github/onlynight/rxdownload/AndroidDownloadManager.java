@@ -36,9 +36,16 @@ class AndroidDownloadManager {
     }
 
     public void enqueue(AndroidDownloadTask task, final AndroidDownload.DownloadListener listener) throws Exception {
-        String key = task.generateKey();
+        final String key = task.generateKey();
         if (TextUtils.isEmpty(key)) {
             throw new Exception("generate download key fail");
+        }
+        boolean exist = checkDownloadExist(key, asyncTasks);
+        if (exist) {
+            if (listener != null) {
+                listener.onProcessing(key, task.getFinalUrl(), task.getAbsoluteFilename());
+            }
+            return;
         }
         asyncTasks.put(key, task);
         Executor executor = getDownloadExecutor(task);
@@ -60,6 +67,7 @@ class AndroidDownloadManager {
 
             @Override
             public void onError(int errorCode, String error) {
+                asyncTasks.remove(key);
                 if (listener != null) {
                     listener.onError(errorCode, error);
                 }
@@ -74,19 +82,26 @@ class AndroidDownloadManager {
 
             @Override
             public void onFinish(String key, String url, String path) {
+                asyncTasks.remove(key);
                 if (listener != null) {
                     listener.onFinish(key, url, path);
                 }
-                asyncTasks.remove(key);
             }
 
         }));
     }
 
     public void execute(AndroidDownloadTask task, final AndroidDownload.DownloadListener listener) throws Exception {
-        String key = task.generateKey();
+        final String key = task.generateKey();
         if (TextUtils.isEmpty(key)) {
             throw new Exception("generate download key fail");
+        }
+        boolean exist = checkDownloadExist(key, syncTasks);
+        if (exist) {
+            if (listener != null) {
+                listener.onProcessing(key, task.getFinalUrl(), task.getAbsoluteFilename());
+            }
+            return;
         }
         syncTasks.put(key, task);
         DownloadRunnable runnable = new DownloadRunnable(task, new AndroidDownload.DownloadListener() {
@@ -107,6 +122,8 @@ class AndroidDownloadManager {
 
             @Override
             public void onError(int errorCode, String error) {
+                syncTasks.remove(key);
+                syncDownloadRunnables.remove(key);
                 if (listener != null) {
                     listener.onError(errorCode, error);
                 }
@@ -121,16 +138,20 @@ class AndroidDownloadManager {
 
             @Override
             public void onFinish(String key, String url, String path) {
+                syncTasks.remove(key);
+                syncDownloadRunnables.remove(key);
                 if (listener != null) {
                     listener.onFinish(key, url, path);
                 }
-                asyncTasks.remove(key);
-                syncDownloadRunnables.remove(key);
             }
 
         });
         syncDownloadRunnables.put(key, runnable);
         runnable.run();
+    }
+
+    private boolean checkDownloadExist(String key, HashMap<String, AndroidDownloadTask> tasks) {
+        return tasks.containsKey(key);
     }
 
     private Executor getDownloadExecutor(AndroidDownloadTask task) {

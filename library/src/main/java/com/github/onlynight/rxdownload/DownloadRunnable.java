@@ -37,11 +37,12 @@ class DownloadRunnable implements Runnable {
     }
 
     private void saveToFile(InputStream inputStream, final long contentLength) {
+        FileOutputStream fos = null;
         try {
             byte buffer[] = new byte[2048];
             int offset;
             long downloadSize = 0;
-            FileOutputStream fos = new FileOutputStream(new File(task.getAbsoluteFilename()));
+            fos = new FileOutputStream(new File(task.getAbsoluteFilename()));
             while ((offset = inputStream.read(buffer, 0, 2048)) != -1) {
                 fos.write(buffer, 0, offset);
                 downloadSize += offset;
@@ -65,7 +66,13 @@ class DownloadRunnable implements Runnable {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        downloadListener.onFinish("", task.getFinalUrl(), task.getAbsoluteFilename());
+                        String key = "";
+                        try {
+                            key = task.generateKey();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        downloadListener.onFinish(key, task.getFinalUrl(), task.getAbsoluteFilename());
                     }
                 });
             }

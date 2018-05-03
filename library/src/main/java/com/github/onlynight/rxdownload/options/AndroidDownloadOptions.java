@@ -8,13 +8,47 @@ import java.util.List;
 
 public class AndroidDownloadOptions implements Cloneable {
 
+    /**
+     * max parallel download file size,
+     * it will determine the ThreadPool Core Thread size.
+     */
     private int parallelMaxDownloadSize;
+
+    /**
+     * the GLOBAL http request host name
+     *
+     * @Nullable
+     */
     private String host;
+
+    /**
+     * set the file download path
+     */
     private String downloadPath;
+
+    /**
+     * set the http request header
+     */
     private List<AndroidDownload.HttpHeader> headers;
+
+    /**
+     * http requester make factory, you can use the different HTTP PIPELINE to download file
+     */
     private HttpRequesterFactory httpRequesterFactory;
+
+    /**
+     * http connect timeout
+     */
     private int connectTimeout = 10 * 1000;
+
+    /**
+     * http write timeout
+     */
     private int writeTimeout = 10 * 1000;
+
+    /**
+     * http read timeout
+     */
     private int readTimeout = 10 * 1000;
 
     public AndroidDownloadOptions() {

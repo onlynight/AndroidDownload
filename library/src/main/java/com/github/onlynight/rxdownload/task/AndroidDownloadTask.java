@@ -13,11 +13,37 @@ import java.util.List;
 
 public class AndroidDownloadTask {
 
+    /**
+     * the default GLOBAL download options
+     */
     private AndroidDownloadOptions defaultAndroidDownloadOptions;
-    private AndroidDownloadOptions androidDownloadOptions;
+
+    /**
+     * applied download options, it will replace {@link this#defaultAndroidDownloadOptions}'s property
+     */
+    private AndroidDownloadOptions downloadOptions;
+
+    /**
+     * when you want get the download options, you should use this options.
+     */
     private AndroidDownloadOptions finalOptions;
+
+    /**
+     * download url.
+     * if it start with http, then then {@link AndroidDownloadOptions#getHost()} will never be used,
+     * or it will use the {@link AndroidDownloadOptions#getHost()} as host.
+     */
     private String url;
+
+    /**
+     * final download file name.
+     * the absolute file path is {@link AndroidDownloadOptions#getDownloadPath()} + {@link this#filename}
+     */
     private String filename;
+
+    /**
+     * use the download url and filename to generate the download key to prevent multi request download.
+     */
     private String downloadKey;
 
     public AndroidDownloadTask setDefaultAndroidDownloadOptions(AndroidDownloadOptions androidDownloadOptions) {
@@ -26,7 +52,7 @@ public class AndroidDownloadTask {
     }
 
     public AndroidDownloadTask applyDownloadOptions(AndroidDownloadOptions androidDownloadOptions) {
-        this.androidDownloadOptions = androidDownloadOptions;
+        this.downloadOptions = androidDownloadOptions;
         return this;
     }
 
@@ -84,28 +110,28 @@ public class AndroidDownloadTask {
                     finalOptions = defaultAndroidDownloadOptions.clone();
                 }
 
-                if (androidDownloadOptions != null) {
+                if (downloadOptions != null) {
 
                     if (finalOptions == null) {
-                        finalOptions = androidDownloadOptions.clone();
+                        finalOptions = downloadOptions.clone();
                     } else {
 
-                        String host = androidDownloadOptions.getHost();
+                        String host = downloadOptions.getHost();
                         if (!TextUtils.isEmpty(host)) {
                             finalOptions.setHost(host);
                         }
 
-                        String downloadPath = androidDownloadOptions.getDownloadPath();
+                        String downloadPath = downloadOptions.getDownloadPath();
                         if (!TextUtils.isEmpty(downloadPath)) {
                             finalOptions.setDownloadPath(downloadPath);
                         }
 
-                        HttpRequesterFactory factory = androidDownloadOptions.getHttpRequesterFactory();
+                        HttpRequesterFactory factory = downloadOptions.getHttpRequesterFactory();
                         if (factory != null) {
                             finalOptions.setHttpRequesterFactory(factory);
                         }
 
-                        List<AndroidDownload.HttpHeader> headers = androidDownloadOptions.getHeaders();
+                        List<AndroidDownload.HttpHeader> headers = downloadOptions.getHeaders();
                         if (headers != null) {
                             finalOptions.setHeaders(headers);
                         }

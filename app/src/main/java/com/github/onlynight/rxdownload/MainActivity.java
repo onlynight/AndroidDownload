@@ -65,6 +65,11 @@ public class MainActivity extends AppCompatActivity {
                             System.out.println(url + " =====> download finish");
                         }
 
+                        @Override
+                        public void onProcessing(String key, String url, String path) {
+                            super.onProcessing(key, url, path);
+                            System.out.println("url = " + url + " =====> is in processing");
+                        }
                     });
         } catch (Exception e) {
             e.printStackTrace();
@@ -74,12 +79,11 @@ public class MainActivity extends AppCompatActivity {
     private void testDownloadFail() {
         try {
             AndroidDownloadOptions options1 = new AndroidDownloadOptions()
-//                    .setHost("http://nc-release.wdjcdn.com/temp/")
                     .setDownloadPath("/sdcard/temp");
 
             AndroidDownload.get()
                     .setFilename("wandoujia1.apk")
-                    .setUrl("files/jupiter/5.52.20.13520/wandoujia-wandoujia_web.apk")
+                    .setUrl("http://nc-release.wdjcdn.com/files/jupiter/5.52.20.13520/wandoujia-wandoujia_web.apk")
                     .applyOptions(options1)
                     .downloadAsync(new AndroidDownload.SimpleDownloadListener() {
 
@@ -96,6 +100,12 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onFinish(String key, String url, String path) {
                             System.out.println(url + " =====> download finish");
+                        }
+
+                        @Override
+                        public void onProcessing(String key, String url, String path) {
+                            super.onProcessing(key, url, path);
+                            System.out.println("url = " + url + " =====> is in processing");
                         }
 
                     });
