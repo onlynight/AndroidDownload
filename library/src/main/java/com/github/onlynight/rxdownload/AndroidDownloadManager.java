@@ -2,8 +2,8 @@ package com.github.onlynight.rxdownload;
 
 import android.text.TextUtils;
 
-import com.github.onlynight.rxdownload.options.DownloadOptions;
-import com.github.onlynight.rxdownload.task.RxDownloadTask;
+import com.github.onlynight.rxdownload.options.AndroidDownloadOptions;
+import com.github.onlynight.rxdownload.task.AndroidDownloadTask;
 
 import java.util.HashMap;
 import java.util.concurrent.Executor;
@@ -11,38 +11,38 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-class DownloadManager {
+class AndroidDownloadManager {
 
-    private static DownloadManager instance;
+    private static AndroidDownloadManager instance;
 
-    private HashMap<String, RxDownloadTask> asyncTasks;
-    private HashMap<String, RxDownloadTask> syncTasks;
+    private HashMap<String, AndroidDownloadTask> asyncTasks;
+    private HashMap<String, AndroidDownloadTask> syncTasks;
     private HashMap<String, DownloadRunnable> syncDownloadRunnables;
     private int parallelMaxDownloadSize = 5;
 
     private Executor downloadExecutor;
 
-    public static DownloadManager getInstance() {
+    public static AndroidDownloadManager getInstance() {
         if (instance == null) {
-            instance = new DownloadManager();
+            instance = new AndroidDownloadManager();
         }
         return instance;
     }
 
-    private DownloadManager() {
+    private AndroidDownloadManager() {
         asyncTasks = new HashMap<>();
         syncTasks = new HashMap<>();
         syncDownloadRunnables = new HashMap<>();
     }
 
-    public void enqueue(RxDownloadTask task, final RxDownload.DownloadListener listener) throws Exception {
+    public void enqueue(AndroidDownloadTask task, final AndroidDownload.DownloadListener listener) throws Exception {
         String key = task.generateKey();
         if (TextUtils.isEmpty(key)) {
             throw new Exception("generate download key fail");
         }
         asyncTasks.put(key, task);
         Executor executor = getDownloadExecutor(task);
-        executor.execute(new DownloadRunnable(task, new RxDownload.DownloadListener() {
+        executor.execute(new DownloadRunnable(task, new AndroidDownload.DownloadListener() {
 
             @Override
             public void onStart(String key, String url, String path) {
@@ -52,14 +52,21 @@ class DownloadManager {
             }
 
             @Override
-            public void onError(String error) {
+            public void onProcessing(String key, String url, String path) {
                 if (listener != null) {
-                    listener.onError(error);
+                    listener.onProcessing(key, url, path);
                 }
             }
 
             @Override
-            public void onProgressUpdate(int total, int current, float percent) {
+            public void onError(int errorCode, String error) {
+                if (listener != null) {
+                    listener.onError(errorCode, error);
+                }
+            }
+
+            @Override
+            public void onProgressUpdate(long total, long current, float percent) {
                 if (listener != null) {
                     listener.onProgressUpdate(total, current, percent);
                 }
@@ -76,13 +83,13 @@ class DownloadManager {
         }));
     }
 
-    public void execute(RxDownloadTask task, final RxDownload.DownloadListener listener) throws Exception {
+    public void execute(AndroidDownloadTask task, final AndroidDownload.DownloadListener listener) throws Exception {
         String key = task.generateKey();
         if (TextUtils.isEmpty(key)) {
             throw new Exception("generate download key fail");
         }
         syncTasks.put(key, task);
-        DownloadRunnable runnable = new DownloadRunnable(task, new RxDownload.DownloadListener() {
+        DownloadRunnable runnable = new DownloadRunnable(task, new AndroidDownload.DownloadListener() {
 
             @Override
             public void onStart(String key, String url, String path) {
@@ -92,14 +99,21 @@ class DownloadManager {
             }
 
             @Override
-            public void onError(String error) {
+            public void onProcessing(String key, String url, String path) {
                 if (listener != null) {
-                    listener.onError(error);
+                    listener.onProcessing(key, url, path);
                 }
             }
 
             @Override
-            public void onProgressUpdate(int total, int current, float percent) {
+            public void onError(int errorCode, String error) {
+                if (listener != null) {
+                    listener.onError(errorCode, error);
+                }
+            }
+
+            @Override
+            public void onProgressUpdate(long total, long current, float percent) {
                 if (listener != null) {
                     listener.onProgressUpdate(total, current, percent);
                 }
@@ -119,12 +133,12 @@ class DownloadManager {
         runnable.run();
     }
 
-    private Executor getDownloadExecutor(RxDownloadTask task) {
+    private Executor getDownloadExecutor(AndroidDownloadTask task) {
         if (downloadExecutor != null) {
             return downloadExecutor;
         }
 
-        DownloadOptions options = task.getDefaultDownloadOptions();
+        AndroidDownloadOptions options = task.getDefaultAndroidDownloadOptions();
         if (options != null) {
             parallelMaxDownloadSize = options.getParallelMaxDownloadSize();
         }

@@ -8,7 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ProgressBar;
 
-import com.github.onlynight.rxdownload.options.DownloadOptions;
+import com.github.onlynight.rxdownload.options.AndroidDownloadOptions;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,24 +33,30 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onDownloadClick(View view) {
-        DownloadOptions options = new DownloadOptions().setHost("http://nc-release.wdjcdn.com/")
-                .setParallelMaxDownloadSize(5)
-                .setDownloadPath("/sdcard/Download");
+        testDownload();
+        testDownloadFail();
+    }
 
+    private void testDownload() {
         try {
-            RxDownload.get()
+            AndroidDownloadOptions options = new AndroidDownloadOptions().setHost("http://nc-release.wdjcdn.com/")
+                    .setHttpRequesterFactory(new OkHttpHttpFactory())
+                    .setParallelMaxDownloadSize(5)
+                    .setDownloadPath("/sdcard/Download");
+
+            AndroidDownload.get()
                     .setDefaultOptions(options)
                     .setFilename("wandoujia.apk")
                     .setUrl("files/jupiter/5.52.20.13520/wandoujia-wandoujia_web.apk")
-                    .downloadAsync(new RxDownload.SimpleDownloadListener() {
+                    .downloadAsync(new AndroidDownload.SimpleDownloadListener() {
 
                         @Override
-                        public void onError(String error) {
-                            System.out.println(error);
+                        public void onError(int errorCode, String error) {
+                            System.out.println("error code = " + errorCode + " error msg = " + error);
                         }
 
                         @Override
-                        public void onProgressUpdate(int total, int current, float percent) {
+                        public void onProgressUpdate(long total, long current, float percent) {
                             progressBar.setProgress((int) (percent * 10));
                         }
 
@@ -63,23 +69,27 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
 
+    private void testDownloadFail() {
         try {
-            DownloadOptions options1 = new DownloadOptions().setHost("http://nc-release.wdjcdn.com/temp/");
+            AndroidDownloadOptions options1 = new AndroidDownloadOptions()
+//                    .setHost("http://nc-release.wdjcdn.com/temp/")
+                    .setDownloadPath("/sdcard/temp");
 
-            RxDownload.get()
+            AndroidDownload.get()
                     .setFilename("wandoujia1.apk")
                     .setUrl("files/jupiter/5.52.20.13520/wandoujia-wandoujia_web.apk")
                     .applyOptions(options1)
-                    .downloadAsync(new RxDownload.SimpleDownloadListener() {
+                    .downloadAsync(new AndroidDownload.SimpleDownloadListener() {
 
                         @Override
-                        public void onError(String error) {
-                            System.out.println(error);
+                        public void onError(int errorCode, String error) {
+                            System.out.println("error code = " + errorCode + " error msg = " + error);
                         }
 
                         @Override
-                        public void onProgressUpdate(int total, int current, float percent) {
+                        public void onProgressUpdate(long total, long current, float percent) {
                             progressBar1.setProgress((int) (percent * 10));
                         }
 
