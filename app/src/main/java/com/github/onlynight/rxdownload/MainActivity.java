@@ -35,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     public void onDownloadClick(View view) {
         testDownload();
         testDownloadFail();
+        syncDownload();
     }
 
     private void testDownload() {
@@ -112,5 +113,49 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void syncDownload() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    AndroidDownloadOptions options1 = new AndroidDownloadOptions()
+                            .setDownloadPath("/sdcard/Download");
+
+                    AndroidDownload.get()
+                            .setFilename("wandoujia2.apk")
+                            .setUrl("http://nc-release.wdjcdn.com/files/jupiter/5.52.20.13520/wandoujia-wandoujia_web.apk")
+                            .applyOptions(options1)
+                            .downloadSync(new AndroidDownload.SimpleDownloadListener() {
+
+                                @Override
+                                public void onError(int errorCode, String error) {
+                                    System.out.println("error code = " + errorCode + " error msg = " + error);
+                                }
+
+                                @Override
+                                public void onProgressUpdate(long total, long current, float percent) {
+                                    progressBar1.setProgress((int) (percent * 10));
+                                }
+
+                                @Override
+                                public void onFinish(String key, String url, String path) {
+                                    System.out.println(url + " =====> download finish");
+                                }
+
+                                @Override
+                                public void onProcessing(String key, String url, String path) {
+                                    super.onProcessing(key, url, path);
+                                    System.out.println("url = " + url + " =====> is in processing");
+                                }
+
+                            });
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 }

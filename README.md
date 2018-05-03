@@ -28,7 +28,7 @@ Step 2. Add the dependency
 
 ```java
 dependencies {
-    implementation 'com.github.onlynight:AndroidDownload:0.0.1'
+    implementation 'com.github.onlynight:AndroidDownload:0.1.0'
 }
 ```
 
