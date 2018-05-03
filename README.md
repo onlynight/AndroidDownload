@@ -68,3 +68,7 @@ AndroidDownload.get()
 # UPDATE
 
 The next step is to support big file download and continue download when breakdown.
+
+# DESIGN
+
+![design uml](./images/uml.png)
